@@ -2,7 +2,7 @@
 
 ## Results
 
-**223 browser tests pass** across Chromium 153.0.8010.12, Firefox 155.0, and
+**226 browser tests pass** across Chromium 153.0.8010.12, Firefox 155.0, and
 Playwright WebKit 26.6. Package checks also pass: imports, types, SSR, and tarball contents.
 CI runs these checks plus WPT in Chrome, Firefox, and actual Safari. Safari runs on
 `macos-26`; Playwright WebKit is a separate build.
@@ -72,7 +72,7 @@ and `webmcp-types@0.1.9`.
   (`toolactivated`/`toolcancel`, their handlers, and `ToolActivatedEvent`/`ToolCancelEvent`)
   are not implemented.
 - **Draft differences:** results are JSON-serialized; some pinned tests expect raw
-  strings. Omitted or `undefined` input becomes `{}`; `null` and primitives reject.
+  strings.
 - **Timing:** MessagePorts approximate native task ordering. Aborting before
   dispatch skips the callback; the draft dispatches and then aborts its signal.
   Delegated permission checks are asynchronous, so argument errors can precede
