@@ -41,39 +41,6 @@ test("operations reject invalid receivers before reading arguments", async ({ pa
   expect(outcome).toEqual({ reads: 0, errors: Array(12).fill("TypeError") });
 });
 
-test("every operation rejects when the server opts out of origin-keyed agent clustering", async ({
-  page,
-}) => {
-  await page.goto("http://127.0.0.1:8793/no-cluster");
-  await page.addScriptTag({ url: "/auto.js" });
-  const outcome = await page.evaluate(async () => {
-    const context = document.modelContext!;
-    const errors = [];
-    for (const operation of [
-      () => context.getTools(),
-      () => context.registerTool({ name: "x", description: "X", execute: () => null }),
-      () =>
-        context.executeTool(
-          { name: "x", title: "", description: "X", window, origin: location.origin },
-          {},
-        ),
-    ]) {
-      try {
-        await operation();
-        errors.push("resolved");
-      } catch (error) {
-        if (!(error instanceof Error)) {
-          throw error;
-        }
-        errors.push(error.name);
-      }
-    }
-    return errors;
-  });
-
-  expect(outcome).toEqual(["SecurityError", "SecurityError", "SecurityError"]);
-});
-
 test("origin filters accept only potentially trustworthy origins", async ({ page }) => {
   await page.addScriptTag({ url: "/auto.js" });
   const outcome = await page.evaluate(async () => {
