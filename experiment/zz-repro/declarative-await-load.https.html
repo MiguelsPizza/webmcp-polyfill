@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/webmcp/resources/helpers.js"></script>
+<form toolname="repro" tooldescription="Repro" toolautosubmit target="hidden_iframe" action="about:blank"><input name="text"></form>
+<iframe name="hidden_iframe" style="display:none"></iframe>
+<script>
+promise_test(async () => {
+  const tool = await waitForTool("repro");
+  const loaded = new Promise((resolve) => document.querySelector("iframe").addEventListener("load", resolve, { once: true }));
+  assert_equals(await document.modelContext.executeTool(tool, { text: "x" }), null);
+  await loaded;
+}, "Waits for the hidden iframe to load after an autosubmitted declarative call");
+</script>

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/webmcp/resources/helpers.js"></script>
+<iframe style="display:none"></iframe>
+<script>
+promise_test(async () => {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  document.querySelector("iframe").src = "about:blank?x";
+}, "Ends while a hidden iframe navigates by src");
+</script>

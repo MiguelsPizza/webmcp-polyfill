@@ -1,0 +1,74 @@
+name: Safari window close experiment
+
+on:
+  push:
+    branches: [exp/safari-window-close]
+
+permissions:
+  contents: read
+
+jobs:
+  safari:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Read WPT revision
+        id: wpt
+        run: echo "revision=$(cat wpt/revision.txt)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v7
+        with:
+          repository: web-platform-tests/wpt
+          ref: ${{ steps.wpt.outputs.revision }}
+          path: .reference/wpt
+          persist-credentials: false
+          sparse-checkout: |
+            common
+            docs
+            interfaces
+            resources
+            tools
+            webmcp
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: npm install --global pnpm@10.14.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Configure Safari
+        run: |
+          sudo safaridriver --enable
+          python .reference/wpt/wpt make-hosts-file | sudo tee -a /etc/hosts
+          mkdir -p wpt-results
+          cp -R experiment/zz-repro .reference/wpt/webmcp/zz-repro
+      - name: A - plain pages without the polyfill
+        continue-on-error: true
+        timeout-minutes: 10
+        run: >-
+          experiment/run.sh none
+          webmcp/zz-repro/submit.https.html
+          webmcp/zz-repro/submit-await-load.https.html
+          webmcp/zz-repro/submit-pagehide.https.html
+          webmcp/zz-repro/iframe-src.https.html
+          webmcp/zz-repro/submit-network.https.html
+      - name: B - plain and declarative pages with the polyfill
+        continue-on-error: true
+        timeout-minutes: 10
+        run: >-
+          experiment/run.sh polyfill
+          webmcp/zz-repro
+          webmcp/declarative/execute_tool_change_event.https.html
+          webmcp/declarative/execute_tool_submit_from_js.https.html
+          webmcp/declarative/select-multiple-events.https.html
+          webmcp/declarative/executeTool-pseudo-classes.https.html
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: safari-experiment
+          path: wpt-results/
+          retention-days: 7

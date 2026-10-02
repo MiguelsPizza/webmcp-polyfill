@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/webmcp/resources/helpers.js"></script>
+<form target="hidden_iframe" action="about:blank"><input name="text" value="x"></form>
+<iframe name="hidden_iframe" style="display:none"></iframe>
+<script>
+promise_test(async () => {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const loaded = new Promise((resolve) => document.querySelector("iframe").addEventListener("load", resolve, { once: true }));
+  document.querySelector("form").requestSubmit();
+  await loaded;
+}, "Waits for the hidden iframe to load after a form submission");
+</script>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="/webmcp/resources/helpers.js"></script>
+<form target="hidden_iframe" action="/common/blank.html"><input name="text" value="x"></form>
+<iframe name="hidden_iframe" style="display:none"></iframe>
+<script>
+promise_test(async () => {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  document.querySelector("form").requestSubmit();
+}, "Ends while a form submission navigates a hidden iframe to a network URL");
+</script>
