@@ -1,0 +1,51 @@
+--- a/webmcp/declarative/execute_tool_change_event.https.html
++++ b/webmcp/declarative/execute_tool_change_event.https.html
+@@ -6,7 +6,7 @@
+ <script src="/webmcp/resources/helpers.js"></script>
+ 
+ <form toolname="fill_text" tooldescription="Fill some text"
+-  toolautosubmit target="hidden_iframe" action="about:blank">
++  toolautosubmit target="hidden_iframe" action="/common/blank.html">
+   <input id="myinput" name="text" type="text">
+   <input id="mynumber" name="number" type="number">
+   <input id="mycheckbox" name="checkbox" type="checkbox" value="check1">
+--- a/webmcp/declarative/execute_tool_submit_from_js.https.html
++++ b/webmcp/declarative/execute_tool_submit_from_js.https.html
+@@ -5,7 +5,7 @@
+ <script src="/resources/testharnessreport.js"></script>
+ <script src="/webmcp/resources/helpers.js"></script>
+ 
+-<form toolname="submit_test" tooldescription="Submit test form" target="hidden_iframe" action="about:blank" toolautosubmit>
++<form toolname="submit_test" tooldescription="Submit test form" target="hidden_iframe" action="/common/blank.html" toolautosubmit>
+ </form>
+ <iframe name="hidden_iframe" style="display:none"></iframe>
+ 
+--- a/webmcp/declarative/select-multiple-events.https.html
++++ b/webmcp/declarative/select-multiple-events.https.html
+@@ -12,7 +12,7 @@
+   tooldescription="Select fruits you like"
+   toolautosubmit
+   target=hidden_iframe
+-  action="about:blank">
++  action="/common/blank.html">
+   <select id=fruits name=fruits multiple>
+     <option value=apple>Apple</option>
+     <option value=orange>Orange</option>
+--- a/webmcp/declarative/executeTool-pseudo-classes.https.html
++++ b/webmcp/declarative/executeTool-pseudo-classes.https.html
+@@ -11,13 +11,13 @@
+   button:tool-submit-active { color: rgb(255, 0, 0); }
+ </style>
+ 
+-<form id="pseudo_form" toolautosubmit toolname="pseudo_tool" tooldescription="Pseudo classes tool" action="about:blank" target="pseudo_iframe">
++<form id="pseudo_form" toolautosubmit toolname="pseudo_tool" tooldescription="Pseudo classes tool" action="/common/blank.html" target="pseudo_iframe">
+   <input type="text" name="query">
+   <button type="submit">Submit</button>
+ </form>
+ <iframe name="pseudo_iframe" style="display:none"></iframe>
+ 
+-<form id="populate_form" toolautosubmit toolname="populate_tool" tooldescription="Form populated at event tool" action="about:blank" target="populate_iframe">
++<form id="populate_form" toolautosubmit toolname="populate_tool" tooldescription="Form populated at event tool" action="/common/blank.html" target="populate_iframe">
+   <input type="text" name="query" value="initial">
+ </form>
+ <iframe name="populate_iframe" style="display:none"></iframe>
