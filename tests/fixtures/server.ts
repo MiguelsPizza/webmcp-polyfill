@@ -45,7 +45,6 @@ const frameHtml = '<!doctype html><title>WebMCP frame</title><script src="/auto.
 const pages: Record<string, string> = {
   "/": blankHtml,
   "/health": blankHtml,
-  "/no-cluster": blankHtml,
   "/app": appHtml,
   "/frame": frameHtml,
   "/startup": startupHtml,
@@ -54,7 +53,6 @@ const pages: Record<string, string> = {
 
 createServer(async (request, response) => {
   const path = new URL(request.url ?? "/", "http://localhost").pathname;
-  response.setHeader("Origin-Agent-Cluster", path === "/no-cluster" ? "?0" : "?1");
   response.setHeader("Cache-Control", "no-store");
   const page = pages[path];
 

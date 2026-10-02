@@ -2,28 +2,29 @@
 
 ## Results
 
-**226 browser tests pass** across Chromium 153.0.8010.12, Firefox 155.0, and
+**223 browser tests pass** across Chromium 153.0.8010.12, Firefox 155.0, and
 Playwright WebKit 26.6. Package checks also pass: imports, types, SSR, and tarball contents.
 CI runs these checks plus WPT in Chrome, Firefox, and actual Safari. Safari runs on
 `macos-26`; Playwright WebKit is a separate build.
 
-WPT covers **all 67 WebMCP testharness files, 161 subtests**, with zero unexpected results:
+WPT covers **all 70 WebMCP testharness files, 190 subtests**, with zero unexpected results
+in Chrome and Firefox:
 
-| Subtest result | Chrome / Firefox | Safari |
-| --- | ---: | ---: |
-| PASS | 96 | 92 |
-| Expected FAIL | 23 | 27 |
-| Expected TIMEOUT | 24 | 24 |
-| Expected NOTRUN | 18 | 18 |
+| Subtest result | Count |
+| --- | ---: |
+| PASS | 92 |
+| Expected FAIL | 52 |
+| Expected TIMEOUT | 26 |
+| Expected NOTRUN | 20 |
 
-Tested with Chrome Canary 156.0.8068.0, Firefox Nightly 158.0a1 (20260922211342),
-Firefox 142.0.1, and Safari 26.6.2 (21624.5.1.11.3) on macOS 26.6.2.
-At the file level: 42 OK, 24 expected timeouts, one expected error.
+Tested with Chrome Canary 157.0.8080.0 and Firefox Nightly 159.0a1 (20260930214513).
+Safari has not yet run at this pin; none of the expectations are browser-specific.
+At the file level: 43 OK, 26 expected timeouts, one expected error.
 
 Expected failures are still failures. `NOTRUN` means an earlier timeout prevented
 the test from running, including three abort cases. Passing declarative checks only
-cover rejection or absence of tools. All 22 pinned IDL checks pass, but that IDL
-predates `debugging` and lifecycle events. This is not full conformance.
+cover rejection or absence of tools. Of the 38 pinned IDL checks, the 16 for lifecycle
+event handlers and interfaces fail. This is not full conformance.
 
 ## Run locally
 
@@ -41,7 +42,7 @@ native WebMCP. A separate Chromium test uses `--enable-features=WebMCP` to check
 that loading the polyfill preserves the native context and its tools.
 
 WPT needs Python 3.11+ and a clean checkout at
-[`2699eaa`](https://github.com/web-platform-tests/wpt/commit/2699eaa2e5f906eda4d7443f7080c3de19e62365).
+[`fe52996`](https://github.com/web-platform-tests/wpt/commit/fe52996d4465f23617bce91927bdd58e6ce8f541).
 The [CI workflow](.github/workflows/test.yml) has the sparse-checkout and dependency setup.
 
 ```sh
@@ -50,10 +51,7 @@ WPT_ROOT=../wpt WPT_BROWSER=firefox pnpm test:wpt
 WPT_ROOT=../wpt WPT_BROWSER=safari pnpm test:wpt
 ```
 
-Firefox downloads Nightly unless `FIREFOX_BIN` is set. The runner enables
-`dom.origin_agent_cluster.default` in the test profile because the pinned pages
-assume origin keying without a header; [Firefox defaults to site keying](https://github.com/mozilla-firefox/firefox/blob/FIREFOX_142_0_1_RELEASE/modules/libpref/init/StaticPrefList.yaml#L5768-L5773).
-Local fixtures test explicit `Origin-Agent-Cluster` headers.
+Firefox downloads Nightly unless `FIREFOX_BIN` is set.
 Safari requires macOS, [Remote Automation, and WPT hosts-file setup](https://web-platform-tests.org/running-tests/safari.html).
 
 Set `WPT_PYTHON` or `WPT_VENV` to use an existing Python environment. Extra arguments
@@ -67,23 +65,18 @@ other non-testharness files are outside this suite.
 
 ## Draft alignment and limitations
 
-Checked against [draft `f5645e9`](https://github.com/webmachinelearning/webmcp/blob/f5645e9aea51eb589599f181d104a2f49430608e/index.bs)
+Checked against [draft `d61d0e6`](https://github.com/webmachinelearning/webmcp/blob/d61d0e6d297ddb6bff3510b1330dbb215c6ef43c/index.bs)
 and `webmcp-types@0.1.9`.
 
-- **Missing APIs:** declarative forms, CSS states, and lifecycle events are not
-  implemented. This includes both the draft's `ModelContext` events and the older
-  `window` events WPT expects.
+- **Missing APIs:** declarative forms, CSS states, and lifecycle events
+  (`toolactivated`/`toolcancel`, their handlers, and `ToolActivatedEvent`/`ToolCancelEvent`)
+  are not implemented.
 - **Draft differences:** results are JSON-serialized; some pinned tests expect raw
-  strings. Omitted or `undefined` input becomes `{}`, matching the types and pinned
-  IDL rather than the recorded draft. `null` and primitives reject.
+  strings. Omitted or `undefined` input becomes `{}`; `null` and primitives reject.
 - **Timing:** MessagePorts approximate native task ordering. Aborting before
   dispatch skips the callback; the draft dispatches and then aborts its signal.
   Delegated permission checks are asynchronous, so argument errors can precede
   `NotAllowedError`.
-- **Safari:** the tested version lacks `originAgentCluster`, so the polyfill skips
-  that check. Four WPT assertions fail with `NotAllowedError` instead of
-  `SecurityError`. [WebKit's implementation](https://github.com/WebKit/WebKit/pull/66162)
-  landed behind a flag.
 - **Frames:** each participating document must load the polyfill. Native contexts
   and WPT's uninstrumented blank helper documents cannot answer its messages.
   Opaque-origin handshakes and inaccessible cross-origin shadow frames are

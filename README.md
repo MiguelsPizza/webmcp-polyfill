@@ -15,7 +15,7 @@ Then install the checkout in your app with `pnpm add /path/to/webmcp-polyfill`.
 
 ## Usage
 
-Use HTTPS or localhost. Some browsers need an `Origin-Agent-Cluster: ?1` header; current Chrome enables origin keying by default.
+Use HTTPS or localhost.
 
 Load the polyfill before registering tools:
 
@@ -74,8 +74,6 @@ import "webmcp-polyfill/auto";
 ```
 
 Next.js runs [client instrumentation](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client) before hydration. A Server Component import alone won't install the polyfill in the browser.
-
-Configure `Origin-Agent-Cluster` through Next.js [`headers()`](https://nextjs.org/docs/app/api-reference/config/next-config-js/headers) if your browser needs it.
 
 Both entry points are SSR-safe: installation does nothing without a document. Your pages can stay server-rendered; WebMCP runs in the browser.
 
