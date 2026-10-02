@@ -45,27 +45,20 @@ jobs:
           sudo safaridriver --enable
           python .reference/wpt/wpt make-hosts-file | sudo tee -a /etc/hosts
           mkdir -p wpt-results
-          cp -R experiment/zz-repro .reference/wpt/webmcp/zz-repro
-      - name: A - plain pages without the polyfill
-        continue-on-error: true
-        timeout-minutes: 10
-        run: >-
-          experiment/run.sh none
-          webmcp/zz-repro/submit.https.html
-          webmcp/zz-repro/submit-await-load.https.html
-          webmcp/zz-repro/submit-pagehide.https.html
-          webmcp/zz-repro/iframe-src.https.html
-          webmcp/zz-repro/submit-network.https.html
-      - name: B - plain and declarative pages with the polyfill
+          cd .reference/wpt/webmcp/declarative
+          for name in execute_tool_change_event execute_tool_submit_from_js select-multiple-events executeTool-pseudo-classes; do
+            sed 's|action="about:blank"|action="/common/blank.html"|' "$name.https.html" > "$name-network.https.html"
+            grep -c 'action="/common/blank.html"' "$name-network.https.html"
+          done
+      - name: C - upstream declarative tests with a network action, with the polyfill
         continue-on-error: true
         timeout-minutes: 10
         run: >-
           experiment/run.sh polyfill
-          webmcp/zz-repro
-          webmcp/declarative/execute_tool_change_event.https.html
-          webmcp/declarative/execute_tool_submit_from_js.https.html
-          webmcp/declarative/select-multiple-events.https.html
-          webmcp/declarative/executeTool-pseudo-classes.https.html
+          webmcp/declarative/execute_tool_change_event-network.https.html
+          webmcp/declarative/execute_tool_submit_from_js-network.https.html
+          webmcp/declarative/select-multiple-events-network.https.html
+          webmcp/declarative/executeTool-pseudo-classes-network.https.html
       - uses: actions/upload-artifact@v7
         if: always()
         with:
