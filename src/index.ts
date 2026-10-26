@@ -178,6 +178,11 @@ class ModelContextPolyfill extends EventTarget implements WebMCP.ModelContext {
       throw new NativeDOMException("A tool description cannot be empty", "InvalidStateError");
     }
     const serializedSchema = inputSchema === undefined ? undefined : serializeJSON(inputSchema);
+    // A toJSON() in the schema can detach this document or register the same name.
+    if (!activeWindow(ownerDocument)) {
+      throw new NativeDOMException("The document is not fully active", "InvalidStateError");
+    }
+    requireUnusedName();
     registrationSignal?.throwIfAborted();
     const exposedOrigins = parseOrigins(exposedTo);
 
@@ -198,7 +203,10 @@ class ModelContextPolyfill extends EventTarget implements WebMCP.ModelContext {
         "abort",
         () => {
           this.#tools.delete(name);
-          void frames.notify(exposedOrigins);
+          // A detached document has no frame tree left to notify.
+          if (activeWindow(ownerDocument)) {
+            void frames.notify(exposedOrigins);
+          }
           reject(registrationSignal.reason);
         },
         { once: true },

@@ -385,6 +385,37 @@ test("operations on a real detached frame reject in the frame's realm", async ({
   expect(frame).toEqual(["InvalidStateError", "InvalidStateError", "InvalidStateError"]);
 });
 
+test("a schema whose toJSON detaches the document rejects registration", async ({ page }) => {
+  const outcome = await page.evaluate(async () => {
+    const iframe = document.createElement("iframe");
+    iframe.src = "/app";
+    const loaded = new Promise<void>((resolve) => {
+      iframe.onload = () => resolve();
+    });
+    document.body.append(iframe);
+    await loaded;
+    const context = iframe.contentDocument!.modelContext!;
+    const FrameException = iframe.contentDocument!.defaultView!.DOMException;
+    try {
+      await context.registerTool({
+        name: "detaching",
+        description: "Detaching",
+        inputSchema: {
+          toJSON() {
+            iframe.remove();
+            return { type: "object" };
+          },
+        },
+        execute: () => null,
+      });
+      return "resolved";
+    } catch (error) {
+      return error instanceof FrameException ? error.name : "wrong realm";
+    }
+  });
+  expect(outcome).toBe("InvalidStateError");
+});
+
 test("installs once, exposes only standard members, and keeps document identity", async ({
   page,
 }) => {
